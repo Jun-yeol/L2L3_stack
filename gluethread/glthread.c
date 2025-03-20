@@ -109,7 +109,7 @@ void
 glthread_priority_insert(glthread_t *base_glthread,
 						 glthread_t *glthread,
 						 int (*comp_fn)(void *, void*),
-						 int offset){
+						 unsigned int offset){
 
 	glthread_t *curr = NULL,
 			   *prev = NULL;
