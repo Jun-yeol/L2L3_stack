@@ -175,7 +175,7 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 		return -1;
 	}
 
-	// 로컬 인터페이스에서 링크 다른쪽에있는 인터페이스에 대한 포인터
+	// 로컬 인터페이스에서 링크 반대쪽에있는 인터페이스에 대한 포인터
 	interface_t *other_interface = &interface->link->intf1 == interface ? \
 								   &interface->link->intf2 : &interface->link->intf1;
 
@@ -187,7 +187,7 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 
 	pkt_with_aux_data[IF_NAME_SIZE] = '\0';
 
-	// 보낼 데이터:[[부가정보][ pkt_data ]]
+	// 보낼 데이터:[[intf_name][ pkt_data ]]
 	memcpy(pkt_with_aux_data + IF_NAME_SIZE, pkt, pkt_size);
 
 	rc = _send_pkt_out(sock, pkt_with_aux_data, pkt_size + IF_NAME_SIZE,
@@ -198,24 +198,30 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 
 }
 
+extern void
+layer2_frame_recv(node_t *node, interface_t *interface,
+		char *pkt, unsigned int pkt_size);
+
 int
 pkt_receive(node_t *node, interface_t *interface, char *pkt, unsigned int pkt_size){
 
 	/* 데이터 링크 계층 진입점
-	 * 패킷이 외부에서 내부로 들어오는 곳
+	   패킷이 외부에서 내부로 들어오는 곳
 	 */
-	
-	printf("msg recvd = %s, on node = %s, IIF= %s\n", pkt, node->node_name, interface->if_name);
 
-	return 0;
+	pkt = pkt_buffer_shift_right(pkt, pkt_size,
+			MAX_PACKET_BUFFER_SIZE - IF_NAME_SIZE);
+
+	layer2_frame_recv(node, interface, pkt, pkt_size);
+
 }
 
 int
-send_pkt_flood(node_t *node, interface_t *exempted_intf, char *pkt, unsigned int pkt_size){
+send_pkt_flood (node_t *node, interface_t *exempted_intf, char *pkt, unsigned int pkt_size){
 
 	int rc = 0;
 	int index = 0;
-	interface_t *intferface = NULL;
+	interface_t *interface = NULL;
 
 	for(index; index < MAX_INTF_PER_NODE; ++index)
 	{
@@ -233,3 +239,4 @@ send_pkt_flood(node_t *node, interface_t *exempted_intf, char *pkt, unsigned int
 
 	return rc;
 }
+

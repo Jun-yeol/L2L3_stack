@@ -80,7 +80,7 @@ node_get_matching_subnet_interface(node_t *node, char *ip_addr){
 	for(int i = 0; i < MAX_INTF_PER_NODE; ++i)
 	{
 		interface = node->intf[i];
-		if(interface == NULL) return NULL;
+		if(interface == NULL) continue;
 
 		if(interface->intf_nw_props.is_ipadd_config == FALSE)
 			continue;
@@ -160,7 +160,21 @@ convert_ip_from_str_to_int(char *ip_addr){
 void
 convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer){
 
-	inet_ntop(AF_INET, ip_addr, output_buffer, 16);
+	inet_ntop(AF_INET, &ip_addr, output_buffer, 16);
 
 	output_buffer[16] = '\0';
+}
+
+char *
+pkt_buffer_shift_right(char *pkt, unsigned int pkt_size,
+		unsigned int total_buffer_size){
+
+	char *pkt_right = NULL;
+	char *curr = pkt;
+
+	pkt_right = pkt + (total_buffer_size - pkt_size);
+	memcpy(pkt_right, pkt, pkt_size);
+	memset(curr, 0, pkt_size);
+
+	return pkt_right;
 }

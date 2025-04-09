@@ -7,3 +7,8 @@ show topology
 show topology
 .
 show topology
+.
+debug show cmdtree
+.
+show topology
+.

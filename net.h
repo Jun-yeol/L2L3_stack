@@ -15,13 +15,23 @@ typedef struct mac_add_ {
 	char mac[48];
 } mac_add_t;
 
+// 전방 선언
+typedef struct arp_table_ arp_table_t;
+
 typedef struct node_nw_prop_ {
 
-	/*L3 properties */
 	unsigned int flags;
+
+	/*L2 Properties*/
+	arp_table_t *arp_table;
+
+	/*L3 Properties */
 	bool_t is_lb_addr_config;
 	ip_add_t lb_addr; /*loopback address of node */
+
 } node_nw_prop_t;
+
+extern void init_arp_table(arp_table_t **arp_table);
 
 static inline void
 init_node_nw_prop(node_nw_prop_t *node_nw_prop) {
@@ -29,6 +39,8 @@ init_node_nw_prop(node_nw_prop_t *node_nw_prop) {
 	node_nw_prop->flags = 0;
 	node_nw_prop->is_lb_addr_config = FALSE;
 	memset(node_nw_prop->lb_addr.ip_addr, 0, 16);
+
+	init_arp_table(&(node_nw_prop->arp_table));
 }
 
 typedef struct intf_nw_prop_ {
@@ -57,6 +69,7 @@ interface_assign_mac_address(interface_t *interface);
 #define IF_MAC(intf_ptr)	((intf_ptr)->intf_nw_props.mac_add.mac)
 #define IF_IP(intf_ptr)		((intf_ptr)->intf_nw_props.ip_add.ip_addr)
 
+#define NODE_ARP_TABLE(node_ptr) (node_ptr->node_nw_props.arp_table)
 #define NODE_LO_ADDR(node_ptr) ((node_ptr)->node_nw_props.lb_addr.ip_addr)
 #define IS_INTF_L3_MODE(intf_ptr) ((intf_ptr)->intf_nw_props.is_ipadd_config)
 
@@ -80,3 +93,6 @@ convert_ip_from_str_to_int(char *ip_addr);
 void
 convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer);
 
+char *
+pkt_buffer_shift_right(char *pkt, unsigned int pkt_size,
+		unsigned int total_buffer_size);
