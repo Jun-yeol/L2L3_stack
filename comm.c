@@ -185,7 +185,7 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 
 	strncpy(pkt_with_aux_data, other_interface->if_name, IF_NAME_SIZE);
 
-	pkt_with_aux_data[IF_NAME_SIZE] = '\0';
+	pkt_with_aux_data[IF_NAME_SIZE - 1] = '\0';
 
 	// 보낼 데이터:[[intf_name][ pkt_data ]]
 	memcpy(pkt_with_aux_data + IF_NAME_SIZE, pkt, pkt_size);
@@ -206,13 +206,15 @@ int
 pkt_receive(node_t *node, interface_t *interface, char *pkt, unsigned int pkt_size){
 
 	/* 데이터 링크 계층 진입점
-	   패킷이 외부에서 내부로 들어오는 곳
+	 * 패킷이 외부에서 내부로 들어오는 곳
 	 */
 
 	pkt = pkt_buffer_shift_right(pkt, pkt_size,
 			MAX_PACKET_BUFFER_SIZE - IF_NAME_SIZE);
 
 	layer2_frame_recv(node, interface, pkt, pkt_size);
+
+	return pkt_size;
 
 }
 
@@ -230,13 +232,37 @@ send_pkt_flood (node_t *node, interface_t *exempted_intf, char *pkt, unsigned in
 		if(!interface)
 			continue;
 
-		if(strncmp(interface->if_name, exempted_intf->if_name, IF_NAME_SIZE) == 0)
+		if(interface == exempted_intf)
 			continue;
 		
-		rc = send_pkt_out(pkt, pkt_size, interface);
+		send_pkt_out(pkt, pkt_size, interface);
 
 	}
 
-	return rc;
+	return 0;
 }
 
+int
+send_pkt_flood_l2_intf_only(node_t *node,
+		interface_t *exempted_intf,
+		char *pkt, unsigned int pkt_size){
+
+	int rc = 0;
+	interface_t *interface = NULL;
+
+	for(int index = 0; index < MAX_INTF_PER_NODE; ++index){
+
+		interface = node->intf[index];
+
+		if(!interface)
+			continue;
+
+		if(interface == exempted_intf ||
+				!IS_INTF_L3_MODE(interface))
+			continue;
+
+		send_pkt_out(pkt, pkt_size, interface);
+	}
+
+	return 0;
+}

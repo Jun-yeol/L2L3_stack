@@ -1,16 +1,17 @@
 #pragma once
-#include "../net.h"
-#include "../graph.h"
+#include "../gluethread/glthread.h"
+#include "../comm.h"
 #include "../utils.h"
 #include "../tcpconst.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #pragma pack (push, 1)
 /*--------------------
-	  ARP Header
---------------------*/
+ *    ARP Header     *
+ --------------------*/
 typedef struct arp_hdr_ {
 
 	short hw_type;			/* 이더넷 케이블*/
@@ -24,9 +25,9 @@ typedef struct arp_hdr_ {
 	unsigned int dst_ip;
 } arp_hdr_t;
 
-/*--------------------
-    Ethernet Header
---------------------*/
+/*-------------------
+ *  Ethernet Header *
+ -------------------*/
 typedef struct ethernet_hdr_ {
 
 	mac_add_t dst_mac;
@@ -78,9 +79,9 @@ l2_frame_recv_qualify_on_interface(interface_t *interface,
 	return FALSE;
 }
 
-/*--------------------
-    ARP Table APIs
---------------------*/
+/*-------------------
+ *  ARP Table APIs  *
+ -------------------*/
 typedef struct arp_table_{
 
 	glthread_t arp_entries;
@@ -114,9 +115,9 @@ delete_arp_table_entry(arp_table_t *arp_table, char *ip_addr);
 void
 dump_arp_table(arp_table_t *arp_table);
 
-/*--------------------
-	 Routine ARP
---------------------*/
+/*------------------
+ *   Routine ARP   *
+ ------------------*/
 void
 send_arp_broadcast_request(node_t *node,
 		interface_t *oif,

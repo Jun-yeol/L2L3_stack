@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "net.h"
 #include "comm.h"
 #include <stdio.h>
 #include "CommandParser/libcli.h"

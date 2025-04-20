@@ -53,23 +53,57 @@ arp_handler(param_t *param, ser_buff_t *tlv_buf,
 
 void
 nw_init_cli(){
-	
-	init_libcli();
 
-	param_t *show	= libcli_get_show_hook();
-	param_t *debug	= libcli_get_debug_hook();
-	param_t *config = libcli_get_config_hook();
-	param_t *run	= libcli_get_run_hook();
-	param_t *debug_show = libcli_get_debug_show_hook();
-	param_t *root	= libcli_get_root();
+    init_libcli();
 
-	{
-		/* show topology */
-		static param_t topology;
-		init_param(&topology, CMD, "topology", show_nw_topology_handler, 0, INVALID,
-				0, "Dump Complete Network Topology");
-		libcli_register_param(show, &topology);
-		set_param_cmd_code(&topology, CMDCODE_SHOW_NW_TOPOLOGY);
-	}
-	support_cmd_negation(config);
+    param_t *show   = libcli_get_show_hook();
+    param_t *debug  = libcli_get_debug_hook();
+    param_t *config = libcli_get_config_hook();
+    param_t *run    = libcli_get_run_hook();
+    param_t *debug_show = libcli_get_debug_show_hook();
+    param_t *root = libcli_get_root();
+
+    {
+        /*show topology*/
+         static param_t topology;
+         init_param(&topology, CMD, "topology", show_nw_topology_handler, 0, INVALID, 0, "Dump Complete Network Topology");
+         libcli_register_param(show, &topology);
+         set_param_cmd_code(&topology, CMDCODE_SHOW_NW_TOPOLOGY);
+         
+         {
+            /*show node*/    
+             static param_t node;
+             init_param(&node, CMD, "node", 0, 0, INVALID, 0, "\"node\" keyword");
+             libcli_register_param(show, &node);
+             libcli_register_display_callback(&node,0 /*display_graph_nodes*/);
+             {
+                /*show node <node-name>*/ 
+                 static param_t node_name;
+                 init_param(&node_name, LEAF, 0, 0, 0/*validate_node_extistence*/, STRING, "node-name", "Node Name");
+                 libcli_register_param(&node, &node_name);
+                 {
+                    /*show node <node-name> arp*/
+                    static param_t arp;
+                    init_param(&arp, CMD, "arp", 0/*show_arp_handler*/, 0, INVALID, 0, "Dump Arp Table");
+                    libcli_register_param(&node_name, &arp);
+                    set_param_cmd_code(&arp, CMDCODE_SHOW_NODE_ARP_TABLE);
+                 }
+                 {
+                    /*show node <node-name> mac*/
+                    static param_t mac;
+                    init_param(&mac, CMD, "mac", 0/*show_mac_handler*/, 0, INVALID, 0, "Dump Mac Table");
+                    libcli_register_param(&node_name, &mac);
+                    set_param_cmd_code(&mac, CMDCODE_SHOW_NODE_MAC_TABLE);
+                 }
+                 {
+                    /*show node <node-name> rt*/
+                    static param_t rt;
+                    init_param(&rt, CMD, "rt", 0/*show_rt_handler*/, 0, INVALID, 0, "Dump L3 Routing table");
+                    libcli_register_param(&node_name, &rt);
+                    set_param_cmd_code(&rt, CMDCODE_SHOW_NODE_RT_TABLE);
+                 }
+             }
+         } 
+    }
+
 }

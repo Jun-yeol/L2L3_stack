@@ -1,13 +1,15 @@
 #include "layer2.h"
+#include "../graph.h"
+#include "../net.h"
 #include "../comm.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../utils.h"
+#include "../tcpconst.h"
 #include <arpa/inet.h>
 
 
-/*--------------------
- 	ARP Table APIs
---------------------*/
+/*-------------------
+ *  ARP Table APIs  *
+ -------------------*/
 void
 init_arp_table(arp_table_t **arp_table){
 
@@ -116,9 +118,9 @@ dump_arp_table(arp_table_t *arp_table){
 
 }
 
-/*--------------------
-  	 Routine ARP
---------------------*/
+/*------------------
+ *   Routine ARP   *
+ ------------------*/
 void
 send_arp_broadcast_request(node_t *node,
 		interface_t *oif,
@@ -241,7 +243,9 @@ process_arp_broadcast_request(node_t *node, interface_t *iif,
 	send_arp_reply_msg(ethernet_hdr, iif);
 }
 
-
+extern void
+l2_switch_recv_frame(interface_t *interface,
+		char *pkt, unsigned int pkt_size);
 
 void
 layer2_frame_recv(node_t *node, interface_t *interface,
@@ -279,4 +283,9 @@ layer2_frame_recv(node_t *node, interface_t *interface,
             //promote_pkt_to_layer3(node, interface, pkt, pkt_size);
             break;
     }
+	//else if(IF_L2_MODE(interface) == ACCESS ||
+	//		IF_L2_MODE(interface) == TRUNCK){
+
+		l2_switch_recv_frame(interface, pkt, pkt_size);
+	//}
 }  

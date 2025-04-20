@@ -8,6 +8,7 @@ OBJS=gluethread/glthread.o	\
 		net.o				\
 		comm.o				\
 		Layer2/layer2.o		\
+		Layer2/l2switch.o	\
 		utils.o				\
 		nwcli.o				\
 
@@ -25,17 +26,19 @@ net.o:net.c
 comm.o:comm.c
 	${CC} ${CFLAGS} -c -I . comm.c -o comm.o
 Layer2/layer2.o:Layer2/layer2.c
-	${CC} ${CFLAGHS} -c -I . Layer2/layer2.c -o Layer2/layer2.o
+	${CC} ${CFLAGS} -c -I . Layer2/layer2.c -o Layer2/layer2.o
+Layer2/l2switch.o:Layer2/l2switch.c
+	${CC} ${CFLAGS} -c -I . Layer2/l2switch.c -o Layer2/l2switch.o
 nwcli.o:nwcli.c
 	${CC} ${CFLAGS} -c -I . nwcli.c -o nwcli.o
 utils.o:utils.c
-	${CC} ${CLAGS} -c -I . utils.c -o utils.o
+	${CC} ${CFLAGS} -c -I . utils.c -o utils.o
 CommandParser/libcli.a:
 	(cd CommandParser; make)
 
 clean:
 	rm *.o
-	rm Layer2/layer2.o
+	rm Layer2/*.o
 	rm gluethread/glthread.o
 	rm *exe
 

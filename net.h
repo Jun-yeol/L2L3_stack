@@ -17,13 +17,18 @@ typedef struct mac_add_ {
 
 // 전방 선언
 typedef struct arp_table_ arp_table_t;
+typedef struct mac_table_ mac_table_t;
 
+/*---------------------*
+ *   Node Properties   *
+ *---------------------*/
 typedef struct node_nw_prop_ {
 
 	unsigned int flags;
 
 	/*L2 Properties*/
 	arp_table_t *arp_table;
+	mac_table_t *mac_table;
 
 	/*L3 Properties */
 	bool_t is_lb_addr_config;
@@ -32,6 +37,7 @@ typedef struct node_nw_prop_ {
 } node_nw_prop_t;
 
 extern void init_arp_table(arp_table_t **arp_table);
+extern void init_mac_table(mac_table_t **mac_table);
 
 static inline void
 init_node_nw_prop(node_nw_prop_t *node_nw_prop) {
@@ -41,12 +47,18 @@ init_node_nw_prop(node_nw_prop_t *node_nw_prop) {
 	memset(node_nw_prop->lb_addr.ip_addr, 0, 16);
 
 	init_arp_table(&(node_nw_prop->arp_table));
+	init_mac_table(&(node_nw_prop->mac_table));
 }
 
+
+/*---------------------------*
+ *   Interface  Properties   *
+ *---------------------------*/
 typedef struct intf_nw_prop_ {
 
 	/*L2 properties*/
 	mac_add_t mac_add;		/*Mac are hard burnt in interface NIC */
+	//intf_l2_mode_t intf_l2_mode;
 
 	/*L3 properties*/
 	bool_t is_ipadd_config; /*Set to TRUE if ip add is configured, intf operates in L3 mode if ip address is configured on it*/
@@ -70,6 +82,7 @@ interface_assign_mac_address(interface_t *interface);
 #define IF_IP(intf_ptr)		((intf_ptr)->intf_nw_props.ip_add.ip_addr)
 
 #define NODE_ARP_TABLE(node_ptr) (node_ptr->node_nw_props.arp_table)
+#define NODE_MAC_TABLE(node_ptr) (node_ptr->node_nw_props.mac_table)
 #define NODE_LO_ADDR(node_ptr) ((node_ptr)->node_nw_props.lb_addr.ip_addr)
 #define IS_INTF_L3_MODE(intf_ptr) ((intf_ptr)->intf_nw_props.is_ipadd_config)
 
