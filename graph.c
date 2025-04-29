@@ -16,12 +16,9 @@ insert_link_between_two_nodes(node_t *node1,
 
 	link_t *link = calloc(1, sizeof(link_t));
 
-	/* Set interface properties */
-	init_intf_nw_prop(&link->intf1.intf_nw_props);
 	strncpy(link->intf1.if_name, from_if_name, IF_NAME_SIZE);
 	link->intf1.if_name[IF_NAME_SIZE - 1] = '\0';
 	
-	init_intf_nw_prop(&link->intf2.intf_nw_props);
 	strncpy(link->intf2.if_name, to_if_name, IF_NAME_SIZE);
 	link->intf2.if_name[IF_NAME_SIZE - 1] = '\0';
 
@@ -37,10 +34,14 @@ insert_link_between_two_nodes(node_t *node1,
 	/* Plugin interface ends into Node */
 	empty_intf_slot = get_node_intf_available_slot(node1);
 	node1->intf[empty_intf_slot] = &link->intf1;
-	interface_assign_mac_address(&link->intf1);
 
 	empty_intf_slot = get_node_intf_available_slot(node2);
 	node2->intf[empty_intf_slot] = &link->intf2;
+
+	init_intf_nw_prop(&link->intf1.intf_nw_props);
+	init_intf_nw_prop(&link->intf2.intf_nw_props);
+
+	interface_assign_mac_address(&link->intf1);
 	interface_assign_mac_address(&link->intf2);
 }
 
@@ -49,7 +50,7 @@ create_new_graph(char *topology_name){
 	
 	graph_t *graph = calloc(1, sizeof(graph_t));
 	strncpy(graph->topology_name, topology_name, 32);
-	graph->topology_name[32] = '\0';
+	graph->topology_name[31] = '\0';
 
 	init_glthread(&graph->node_list);
 	return graph;

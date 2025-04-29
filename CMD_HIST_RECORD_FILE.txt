@@ -12,3 +12,90 @@ debug show cmdtree
 .
 show topology
 .
+.
+show node R0 arp
+show node R0 mac
+show topology
+show node R0_re mac
+show node R0_re arp
+.
+show history
+cls
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+.
+show node L2SW arp
+run node H1 resolve-arp 122.1.1.3
+.
+show topology
+show node H1 mac
+.
+show node H1 arp
+run node H1 resolve-arp 122.1.1.4
+cls
+.
+run node H1 resolve-arp 122.1.1.4
+show topology
+.
+run node H1 resolve-arp ip
+run node H1 resolve-arp 122.1.1.2
+.
+run node H1 resolve-arp 122.1.1.2
+.
+run node H1 resolve-arp 122.1.1.2
+run node H1 resolve-arp 122.1.1.4
+.
+.
+run node H1 resolve-arp 10.1.1.2
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+show node R0_re arp
+show node R0_re mac
+show node R0_re arp
+.
+run node R0_re resolve-arp 20.1.1.2
+show node R0_re arp
+.
+show node R0_re arp
+show node R0_re mac
+run node R0_re resolve-arp 20.1.1.2
+show node R0_re arp
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+show node R0_re arp
+run node R0_re resolve-arp 20/
+run node R0_re resolve-arp 20.1.1.2
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+show to	
+show to	
+show to
+.
+show top
+show topo
+show topo
+show topo
+show topo
+.
+show topo
+show topo
+show topo
+show topo
+.
+show node R0_re arp
+run node R0_re resolve-arp 20.1.1.2

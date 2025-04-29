@@ -46,7 +46,10 @@ typedef struct graph_ {
 
 static inline node_t*
 get_nbr_node(interface_t *interface){
-	
+
+	assert(interface->att_node);
+	assert(interface->link);
+
 	link_t *link = interface->link;
 
 	if(&link->intf1 == interface)
@@ -61,8 +64,10 @@ get_node_intf_available_slot(node_t *node){
 	int index = 0;
 	for(index = 0; index < MAX_INTF_PER_NODE; ++index)
 	{
-		if(!node->intf[index])
-			return index;
+		if(node->intf[index])
+			continue;
+
+		return index;
 	}
 
 	return -1;
@@ -93,7 +98,7 @@ get_node_if_by_name(node_t *node, char *if_name){
 
 		if(interface == NULL) return NULL;
 
-		if(strncmp(if_name, interface->if_name, strlen(if_name) + 1) == 0)
+		if(strncmp(if_name, interface->if_name, IF_NAME_SIZE) == 0)
 			return interface;
 	}
 

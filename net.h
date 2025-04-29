@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils.h"
+#include "stdlib.h"
 #include <memory.h>
 
 typedef struct graph_ graph_t;
@@ -54,14 +55,41 @@ init_node_nw_prop(node_nw_prop_t *node_nw_prop) {
 /*---------------------------*
  *   Interface  Properties   *
  *---------------------------*/
+
+typedef enum{
+
+	ACCESS,
+	TRUNK,
+	L2_MODE_UNKNOWN
+} intf_l2_mode_t;
+
+static inline char *
+intf_l2_mode_str(intf_l2_mode_t intf_l2_mode){
+
+	switch(intf_l2_mode){
+
+		case ACCESS:
+			return "access";
+		case TRUNK:
+			return "trunk";
+		default:
+			return "L2_MODE_UNKNOWN";
+	}
+}
+
+#define MAX_VLAN_MEMBERSHIP 10
+
 typedef struct intf_nw_prop_ {
 
 	/*L2 properties*/
-	mac_add_t mac_add;		/*Mac are hard burnt in interface NIC */
-	//intf_l2_mode_t intf_l2_mode;
+	mac_add_t mac_add;			/*Mac are hard burnt in interface NIC */
+	intf_l2_mode_t intf_l2_mode; /*if IP-address is configured on this interface, then this should be set to UNKNOWN*/
+	unsigned int vlans[MAX_VLAN_MEMBERSHIP]; /*If the interface operating int Trunk mode, it can be a member of these many vlans*/
+
+	bool_t is_ipadd_config_backup;
 
 	/*L3 properties*/
-	bool_t is_ipadd_config; /*Set to TRUE if ip add is configured, intf operates in L3 mode if ip address is configured on it*/
+	bool_t is_ipadd_config;		/*Set to TRUE if ip add is configured, intf operates in L3 mode if ip address is configured on it*/
 	ip_add_t ip_add;
 	char mask;
 } intf_nw_prop_t;
@@ -69,21 +97,29 @@ typedef struct intf_nw_prop_ {
 static inline void
 init_intf_nw_prop(intf_nw_prop_t *intf_nw_props) {
 	
+	/*L2 properties*/
 	memset(intf_nw_props->mac_add.mac , 0 , 48);
+	intf_nw_props->intf_l2_mode = L2_MODE_UNKNOWN;
+	intf_nw_props->is_ipadd_config = FALSE;
+
+	/*L3 properties*/
 	intf_nw_props->is_ipadd_config = FALSE;
 	memset(intf_nw_props->ip_add.ip_addr, 0, 16);
+	intf_nw_props->mask = 0;
 }
 
 void
 interface_assign_mac_address(interface_t *interface);
 
 /*GET shorthand Macros*/
-#define IF_MAC(intf_ptr)	((intf_ptr)->intf_nw_props.mac_add.mac)
-#define IF_IP(intf_ptr)		((intf_ptr)->intf_nw_props.ip_add.ip_addr)
+#define IF_MAC(intf_ptr)		((intf_ptr)->intf_nw_props.mac_add.mac)
+#define IF_IP(intf_ptr)			((intf_ptr)->intf_nw_props.ip_add.ip_addr)
+#define IF_L2_MODE(intf_ptr)	((intf_ptr)->intf_nw_props.intf_l2_mode)
 
 #define NODE_ARP_TABLE(node_ptr) (node_ptr->node_nw_props.arp_table)
 #define NODE_MAC_TABLE(node_ptr) (node_ptr->node_nw_props.mac_table)
 #define NODE_LO_ADDR(node_ptr) ((node_ptr)->node_nw_props.lb_addr.ip_addr)
+
 #define IS_INTF_L3_MODE(intf_ptr) ((intf_ptr)->intf_nw_props.is_ipadd_config)
 
 /*APIs to set Network Node properties*/

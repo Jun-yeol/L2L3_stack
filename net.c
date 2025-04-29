@@ -73,6 +73,7 @@ interface_t *
 node_get_matching_subnet_interface(node_t *node, char *ip_addr){
 	
 	interface_t *interface = NULL;
+
 	char intf_subnet[16];
 	char cmp_subnet[16];
 	char mask;
@@ -80,11 +81,11 @@ node_get_matching_subnet_interface(node_t *node, char *ip_addr){
 	for(int i = 0; i < MAX_INTF_PER_NODE; ++i)
 	{
 		interface = node->intf[i];
-		if(interface == NULL) continue;
+		if(!interface) return NULL;
 
 		if(interface->intf_nw_props.is_ipadd_config == FALSE)
 			continue;
-		
+
 		mask = interface->intf_nw_props.mask;
 
 		memset(intf_subnet, 0, 16);
@@ -95,9 +96,8 @@ node_get_matching_subnet_interface(node_t *node, char *ip_addr){
 		if(strncmp(intf_subnet, cmp_subnet, 16) == 0)
 			return interface;
 
-		}
+	}
 
-	return NULL;
 }
 
 
@@ -114,10 +114,14 @@ void dump_nw_graph(graph_t *graph){
 	ITERATE_GLTHREAD_BEGIN(&graph->node_list, curr){
 
 		node = graph_glue_to_node(curr);
+
+		if(!node) return;
+
 		dump_node_nw_props(node);
-		for(i ; i < MAX_INTF_PER_NODE; ++i){
+		for(i ; i < MAX_INTF_PER_NODE; i++){
 			interface = node->intf[i];
-			if(!interface) break;
+			if(!interface) continue;
+			dump_intf_props(interface);
 		}
 	} ITERATE_GLTHREAD_END(&graph->node_list, curr);
 }
@@ -133,7 +137,7 @@ void dump_node_nw_props(node_t *node){
 	printf("\n");
 }
 
-void dump_intf_nw_props(interface_t *interface){
+void dump_intf_props(interface_t *interface){
 
 	if(interface->intf_nw_props.is_ipadd_config){
 		printf("\t IP Addr = %s/%u", IF_IP(interface), interface->intf_nw_props.mask);
@@ -167,7 +171,7 @@ convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer){
 
 char *
 pkt_buffer_shift_right(char *pkt, unsigned int pkt_size,
-		unsigned int total_buffer_size){
+				unsigned int total_buffer_size){
 
 	char *pkt_right = NULL;
 	char *curr = pkt;

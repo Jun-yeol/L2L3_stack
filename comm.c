@@ -166,6 +166,11 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 	if(!nbr_node)
 		return -1;
 
+	if(pkt_size + IF_NAME_SIZE > MAX_PACKET_BUFFER_SIZE){
+		printf("Error : Node : %s, Pkt Size exceeded\n", sending_node->node_name);
+		return -1;
+	}
+
 	unsigned int dst_udp_port_no = nbr_node->udp_port_number;
 
 	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -258,7 +263,7 @@ send_pkt_flood_l2_intf_only(node_t *node,
 			continue;
 
 		if(interface == exempted_intf ||
-				!IS_INTF_L3_MODE(interface))
+				!IF_L2_MODE(interface))
 			continue;
 
 		send_pkt_out(pkt, pkt_size, interface);

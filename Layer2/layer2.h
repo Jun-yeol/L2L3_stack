@@ -67,11 +67,15 @@ static inline bool_t
 l2_frame_recv_qualify_on_interface(interface_t *interface,
 		ethernet_hdr_t *ethernet_hdr){
 
-	if(!IS_INTF_L3_MODE(interface))
-		return FALSE;
-
-	if(memcmp(ethernet_hdr->dst_mac.mac, IF_MAC(interface), sizeof(mac_add_t)) == 0)
+	if(interface->intf_nw_props.is_ipadd_config == FALSE)
 		return TRUE;
+
+	if(memcmp(IF_MAC(interface),
+				ethernet_hdr->dst_mac.mac,
+				sizeof(mac_add_t)) == 0){
+
+		return TRUE;
+	}
 
 	if(IS_MAC_BROADCAST_ADDR(ethernet_hdr->dst_mac.mac))
 		return TRUE;
@@ -122,3 +126,7 @@ void
 send_arp_broadcast_request(node_t *node,
 		interface_t *oif,
 		char *ip_addr);
+
+void
+node_set_intf_l2_mode(node_t *node, char *intf_name,
+		intf_l2_mode_t intf_l2_mode);

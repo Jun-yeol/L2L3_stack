@@ -118,6 +118,35 @@ dump_arp_table(arp_table_t *arp_table){
 
 }
 
+/*APIs to be used to create topologies*/
+void
+interface_set_l2_mode(node_t *node, interface_t *intf, char* l2_mode_option){
+
+	intf_l2_mode_t intf_l2_mode;
+
+	if(strncmp(l2_mode_option, "access", strlen("access")) == 0){
+
+		intf_l2_mode = ACCESS;
+	}
+	else if(strncmp(l2_mode_option, "trunk", strlen("trunk")) == 0){
+
+		intf_l2_mode = TRUNK;
+	}
+	else{
+		assert(0);
+	}
+
+}
+void
+node_set_intf_l2_mode(node_t *node, char *intf_name,
+		intf_l2_mode_t intf_l2_mode){
+
+	interface_t *interface = get_node_if_by_name(node, intf_name);
+	assert(interface);
+
+	interface_set_l2_mode(node, interface, intf_l2_mode_str(intf_l2_mode));
+}
+
 /*------------------
  *   Routine ARP   *
  ------------------*/
@@ -128,7 +157,7 @@ send_arp_broadcast_request(node_t *node,
 
 	unsigned int payload_size = sizeof(arp_hdr_t);
 	ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *)calloc(1,
-			ETH_HDR_SIZE_EXCL_PAYLOAD + payload_size);
+			sizeof(arp_hdr_t) + sizeof(ethernet_hdr_t));
 
 	if(!oif){
 		oif = node_get_matching_subnet_interface(node, ip_addr);
@@ -145,7 +174,7 @@ send_arp_broadcast_request(node_t *node,
 	ethernet_hdr->type = ARP_MSG;
 
 	// STEP 2 : ARP Broadcast Request MSG를 보내기위한준비
-	arp_hdr_t *arp_hdr = (arp_hdr_t *)ethernet_hdr->payload;
+	arp_hdr_t *arp_hdr = (arp_hdr_t *)(ethernet_hdr->payload);
 	arp_hdr->hw_type = 1;
 	arp_hdr->proto_type = 0x0800;
 	arp_hdr->hw_addr_len = sizeof(mac_add_t);
@@ -160,6 +189,9 @@ send_arp_broadcast_request(node_t *node,
 
 	// 목적지 mac주소는 찾아야 할 값이므로 0으로 초기화
 	memset(arp_hdr->dst_mac.mac, 0, sizeof(mac_add_t));
+
+	inet_pton(AF_INET, ip_addr, &arp_hdr->dst_ip);
+	arp_hdr->dst_ip = htonl(arp_hdr->dst_ip);
 
 	// 이더넷 헤더의 FCS필드에 직접 액세스하지 말아야함
 	// (payload가 가변길이 때문)
@@ -255,11 +287,11 @@ layer2_frame_recv(node_t *node, interface_t *interface,
     
     if(FALSE == l2_frame_recv_qualify_on_interface(interface, ethernet_hdr)){
 
-        printf("L2 Frame Rejected");
+        printf("L2 Frame Rejected on node %s\n", node->node_name);
         return;
     }   
             
-    printf("L2 Frame Accepted\n");
+    printf("L2 Frame Accepted on node %s\n", node->node_name);
             
     switch(ethernet_hdr->type){
     
@@ -283,9 +315,10 @@ layer2_frame_recv(node_t *node, interface_t *interface,
             //promote_pkt_to_layer3(node, interface, pkt, pkt_size);
             break;
     }
-	//else if(IF_L2_MODE(interface) == ACCESS ||
-	//		IF_L2_MODE(interface) == TRUNCK){
+	if(IF_L2_MODE(interface) == ACCESS ||
+			IF_L2_MODE(interface) == TRUNK){
 
 		l2_switch_recv_frame(interface, pkt, pkt_size);
-	//}
-}  
+	}
+} 
+
