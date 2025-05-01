@@ -29,14 +29,23 @@ interface_assign_mac_address(interface_t *interface){
 
 	node_t *node = interface->att_node;
 
+
 	if(!node)
 		return;
 	
-	unsigned int hash_code_val = 0;
-	hash_code_val = hash_code(node->node_name, NODE_NAME_SIZE);
-	hash_code_val *= hash_code(interface->if_name, IF_NAME_SIZE);
-	memset(IF_MAC(interface), 0, sizeof(IF_MAC(interface)));
-	memcpy(IF_MAC(interface), (char *)&hash_code_val, sizeof(unsigned int));
+	/*유일한 MAC 주소값을 위한 hash code*/
+	unsigned int hash_code_val1 = hash_code(node->node_name, NODE_NAME_SIZE);
+	unsigned int hash_code_val2 = hash_code(interface->if_name, IF_NAME_SIZE);
+	unsigned int hash_combined = hash_code_val1 * hash_code_val2;
+
+	unsigned char *mac = IF_MAC(interface);
+
+	mac[0] = 0x02; // 제조사 임의값 
+	mac[1] = (hash_combined >> 0) & 0xFF;
+	mac[2] = (hash_combined >> 8) & 0xFF;
+	mac[3] = (hash_combined >> 16) & 0xFF;
+	mac[4] = (hash_combined >> 24) & 0xFF;
+	mac[5] = (hash_code_val2 & 0xFF); 
 }
 
 bool_t node_set_loopback_address(node_t *node, char *ip_addr){
@@ -107,7 +116,6 @@ void dump_nw_graph(graph_t *graph){
 	node_t *node;
 	glthread_t *curr;
 	interface_t *interface;
-	unsigned int i = 0;
 
 	printf("Topology Name = %s\n", graph->topology_name);
 
@@ -118,7 +126,7 @@ void dump_nw_graph(graph_t *graph){
 		if(!node) return;
 
 		dump_node_nw_props(node);
-		for(i ; i < MAX_INTF_PER_NODE; i++){
+		for(unsigned int i = 0 ; i < MAX_INTF_PER_NODE; i++){
 			interface = node->intf[i];
 			if(!interface) continue;
 			dump_intf_props(interface);
@@ -174,10 +182,14 @@ pkt_buffer_shift_right(char *pkt, unsigned int pkt_size,
 				unsigned int total_buffer_size){
 
 	char *pkt_right = NULL;
-	char *curr = pkt;
+	char *buffer_start = pkt;
 
+	if( pkt < buffer_start || pkt + pkt_size > buffer_start + total_buffer_size
+			|| pkt_size > total_buffer_size)
+		return NULL;
+	
 	pkt_right = pkt + (total_buffer_size - pkt_size);
-	memcpy(pkt_right, pkt, pkt_size);
+	memmove(pkt_right, pkt, pkt_size);
 	memset(curr, 0, pkt_size);
 
 	return pkt_right;
