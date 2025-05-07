@@ -111,3 +111,46 @@ show topo
 .
 run node R0_re resolve-arp 20.1.1.2
 .
+run node R0_re resolve-arp 20.1.1.2
+show topo
+show topo
+show topo
+.
+show topo
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 40.1.1.2
+.
+show topo
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+.
+run node R0_re resolve-arp 20.1.1.2
+show topo
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.12
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+run node R0_re resolve-arp 20.1.1.2
+.
+show node R0_re arp

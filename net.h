@@ -13,7 +13,7 @@ typedef struct ip_add_ {
 } ip_add_t;
 
 typedef struct mac_add_ {
-	char mac[48];
+	unsigned char mac[48];
 } mac_add_t;
 
 // 전방 선언

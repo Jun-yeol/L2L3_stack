@@ -33,19 +33,11 @@ interface_assign_mac_address(interface_t *interface){
 	if(!node)
 		return;
 	
-	/*유일한 MAC 주소값을 위한 hash code*/
-	unsigned int hash_code_val1 = hash_code(node->node_name, NODE_NAME_SIZE);
-	unsigned int hash_code_val2 = hash_code(interface->if_name, IF_NAME_SIZE);
-	unsigned int hash_combined = hash_code_val1 * hash_code_val2;
-
-	unsigned char *mac = IF_MAC(interface);
-
-	mac[0] = 0x02; // 제조사 임의값 
-	mac[1] = (hash_combined >> 0) & 0xFF;
-	mac[2] = (hash_combined >> 8) & 0xFF;
-	mac[3] = (hash_combined >> 16) & 0xFF;
-	mac[4] = (hash_combined >> 24) & 0xFF;
-	mac[5] = (hash_code_val2 & 0xFF); 
+	unsigned int hash_code_val = 0;
+	hash_code_val = hash_code(node->node_name, NODE_NAME_SIZE);
+	hash_code_val *= hash_code(interface->if_name, IF_NAME_SIZE);
+	memset(IF_MAC(interface), 0, sizeof(IF_MAC(interface)));
+	memcpy(IF_MAC(interface), (char *)&hash_code_val, sizeof(unsigned int));
 }
 
 bool_t node_set_loopback_address(node_t *node, char *ip_addr){
@@ -149,7 +141,7 @@ void dump_intf_props(interface_t *interface){
 
 	if(interface->intf_nw_props.is_ipadd_config){
 		printf("\t IP Addr = %s/%u", IF_IP(interface), interface->intf_nw_props.mask);
-		printf("\t MAC : %u:%u:%u:%u:%u:%u\n",
+		printf("\t MAC : %02x:%02x:%02x:%02x:%02x:%02x\n",
 				IF_MAC(interface)[0], IF_MAC(interface)[1],
 				IF_MAC(interface)[2], IF_MAC(interface)[3],
 				IF_MAC(interface)[4], IF_MAC(interface)[5]);
@@ -180,17 +172,38 @@ convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer){
 char *
 pkt_buffer_shift_right(char *pkt, unsigned int pkt_size,
 				unsigned int total_buffer_size){
-
-	char *pkt_right = NULL;
-	char *buffer_start = pkt;
-
-	if( pkt < buffer_start || pkt + pkt_size > buffer_start + total_buffer_size
-			|| pkt_size > total_buffer_size)
-		return NULL;
 	
-	pkt_right = pkt + (total_buffer_size - pkt_size);
-	memmove(pkt_right, pkt, pkt_size);
-	memset(curr, 0, pkt_size);
+	/*
+	if(pkt_size > total_buffer_size) {
+		return NULL;
+	}
 
-	return pkt_right;
+	char *shifted_ptr = pkt + (total_buffer_size - pkt_size);
+
+	memmove(shifted_ptr, pkt, pkt_size);
+
+	memset(pkt, 0, total_buffer_size - pkt_size);
+
+	return shifted_ptr;
+	*/
+
+	char *temp = NULL;
+	bool_t need_temp_memory = FALSE;
+
+	if(pkt_size * 2 > total_buffer_size)
+		need_temp_memory = TRUE;
+
+	if(need_temp_memory){
+		temp = calloc(1, pkt_size);
+		memcpy(temp, pkt, pkt_size);
+		memset(pkt, 0, total_buffer_size);
+		memcpy(pkt + (total_buffer_size - pkt_size), temp, pkt_size);
+		free(temp);
+		return pkt  + (total_buffer_size - pkt_size);
+	}
+
+	memcpy(pkt + (total_buffer_size - pkt_size), pkt, pkt_size);
+	memset(pkt, 0, pkt_size);
+	return pkt + (total_buffer_size - pkt_size);
+
 }

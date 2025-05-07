@@ -181,7 +181,7 @@ send_pkt_out(char *pkt, unsigned int pkt_size,
 	}
 
 	// 로컬 인터페이스에서 링크 반대쪽에있는 인터페이스에 대한 포인터
-	interface_t *other_interface = &interface->link->intf1 == interface ? \
+	interface_t *other_interface = (interface == &interface->link->intf1) ? \
 								   &interface->link->intf2 : &interface->link->intf1;
 
 	memset(send_buffer, 0, MAX_PACKET_BUFFER_SIZE);

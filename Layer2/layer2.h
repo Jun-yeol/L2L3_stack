@@ -42,10 +42,10 @@ typedef struct ethernet_hdr_ {
 	(sizeof(ethernet_hdr_t) - sizeof(((ethernet_hdr_t*)0)->payload))
 
 #define ETH_FCS(eth_hdr_ptr, payload_size)	\
-	(*(unsigned int *)((char *)(((ethernet_hdr_t *)eth_hdr_ptr)->payload + payload_size)))	
+	(*(unsigned int *)(((char *)(((ethernet_hdr_t *)eth_hdr_ptr)->payload) + payload_size)))	
 
 #define GET_ETHERNET_HDR_PAYLOAD(eth_hdr_ptr)	\
-	(char *)((ethernet_hdr_t *)eth_hdr_ptr->payload)
+	(char *)((eth_hdr_ptr)->payload)
 
 static inline ethernet_hdr_t *
 ALLOC_ETH_HDR_WITH_PAYLOAD(char *pkt, unsigned int pkt_size){
@@ -70,17 +70,16 @@ l2_frame_recv_qualify_on_interface(interface_t *interface,
 	if(interface->intf_nw_props.is_ipadd_config == FALSE)
 		return TRUE;
 
-	//if(memcmp(IF_MAC(interface),
-	//			ethernet_hdr->dst_mac.mac,
-	//			sizeof(mac_add_t)) == 0){
-	//
-	//	return TRUE;
-	//}
+	if(memcmp(IF_MAC(interface),
+				ethernet_hdr->dst_mac.mac,
+				sizeof(mac_add_t)) == 0){
+	
+		return TRUE;
+	}
 
 	if(IS_MAC_BROADCAST_ADDR(ethernet_hdr->dst_mac.mac))
 		return TRUE;
 
-	return FALSE;
 }
 
 /*-------------------

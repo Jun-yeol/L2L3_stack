@@ -23,9 +23,9 @@ arp_table_entry_add(arp_table_t *arp_table, arp_entry_t *arp_entry){
 	arp_entry_t *arp_entry_old = arp_table_lookup(arp_table,
 			arp_entry->ip_addr.ip_addr);
 
-	if(arp_entry &&
-				memcmp(arp_entry_old, arp_entry, sizeof(arp_entry_t)) == 0)
-			return FALSE;
+	if(arp_entry_old &&
+			memcmp(arp_entry_old, arp_entry, sizeof(arp_entry_t)) == 0)
+		return FALSE;
 
 	if(arp_entry_old){
 		
@@ -78,22 +78,13 @@ arp_table_update_from_arp_reply(arp_table_t *arp_table,
 void
 delete_arp_table_entry(arp_table_t *arp_table, char *ip_addr){
 	
-	glthread_t *curr;
-	arp_entry_t *arp_entry;
+	arp_entry_t *arp_entry = arp_table_lookup(arp_table, ip_addr);
 
-	ITERATE_GLTHREAD_BEGIN(&arp_table->arp_entries, curr){
+	if(!arp_entry)
+		return;
 
-		arp_entry = arp_glue_to_arp_entry(curr);
-
-		if(strncmp(arp_entry->ip_addr.ip_addr, ip_addr, 16) == 0){
-
-			remove_glthread(curr);
-			free(arp_entry);
-		}
-
-	} ITERATE_GLTHREAD_END(&arp_table->arp_entries, curr);
-
-	return;
+	remove_glthread(&arp_entry->arp_glue);
+	free(arp_entry);
 }
 
 void
@@ -206,7 +197,7 @@ send_arp_broadcast_request(node_t *node,
 
 static void
 send_arp_reply_msg(ethernet_hdr_t *ethernet_hdr_in, interface_t *oif){
-	
+
 	arp_hdr_t *arp_hdr_in = (arp_hdr_t *)(GET_ETHERNET_HDR_PAYLOAD(ethernet_hdr_in));
 	ethernet_hdr_t *ethernet_hdr_reply = (ethernet_hdr_t *)calloc(1, MAX_PACKET_BUFFER_SIZE);
 
@@ -236,6 +227,8 @@ send_arp_reply_msg(ethernet_hdr_t *ethernet_hdr_in, interface_t *oif){
 
 	char *shifted_pkt_buffer = pkt_buffer_shift_right((char *)ethernet_hdr_reply,
 			total_pkt_size, MAX_PACKET_BUFFER_SIZE);
+
+	assert(shifted_pkt_buffer != NULL);
 
 	send_pkt_out(shifted_pkt_buffer, total_pkt_size, oif);
 	free(ethernet_hdr_reply);
