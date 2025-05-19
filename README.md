@@ -1,8 +1,22 @@
-## 가상 L2 스위치 통신 개발 
+# **가상 L2 스위치 통신 개발**
 <br>
 
-### 네트워크 시뮬레이터 토폴로지 설계
+### 🛠️프로젝트 개요
+이 프로젝트는 가상 L2 스위치 통신 시뮬레이터 개발을 목표로합니다.
+네트워크 내 노드간 통신을 시뮬레이션하기 위해 Ethernet 및 ARP 프로토콜을 구현하였으며, UDP 소켓, loopback 주소,
+select() 모델을 활용하여 데이터 전송을 구현합니다.
+
+### 🛠️기술 스택
+- C
+- Vim
+- Make
+- GDB
+---
 <br>
+
+
+### 🏗️아키텍처
+#### 네트워크 구조체
 
 1. `interface_t` (인터페이스 구조체): 노드의 네트워크 인터페이스를 나타냅니다.
 
@@ -54,15 +68,16 @@
 <br>
 
 5. 구조체들간에 연결 관계 시각화
-![image](https://github.com/user-attachments/assets/5fe0cba9-8007-479e-aa1f-56cd7728e45a)
+<img src="https://github.com/user-attachments/assets/5fe0cba9-8007-479e-aa1f-56cd7728e45a" width="800px">
 <br>
 
   이 구조체들을 기반으로 한 네트워크 시뮬레이터를 생성.
 
 ---
 
-### 가상 노드들간에 통신 방법
-![image](https://github.com/user-attachments/assets/a6f144d8-cdeb-4afe-8129-e211157e67ac)
+### 🔗통신 모델
+<img src="https://github.com/user-attachments/assets/a6f144d8-cdeb-4afe-8129-e211157e67ac" width="800px">
+
 
 #### 데이터 전송 시 select() 모델 과 loopback 주소를 활용
 
@@ -72,18 +87,33 @@
 이 과정에서 논리적으로 노드 간의 데이터 통신이 이루어짐.
 
 <br>
-
 <br>
-
-### ARP 프로토콜 설계
 
 ---
 
+
+### 📦프로토콜 설계
+
+#### Ethernet 프로토콜
+
+![스크린샷 2025-05-19 164117](https://github.com/user-attachments/assets/c49f96da-3151-4635-89f1-55db7fe15c63)
+
+- 출발지 MAC, 목적지 MAC, 페이로드와 같은 필드로 구성된 Ethernet 프레임 구조를 구현
+
 <br>
 
-### ARP 프로토콜 통신 과정
+#### ARP 프로토콜
+
+![image](https://github.com/user-attachments/assets/7f0b8598-e49f-42c8-bae0-3c8c811ccedb)
+
+- IP주소와 MAC 주소 간의 매핑을 처리
+- ARP 요청/응답 처리 및 ARP 테이블 관리
+
+<br>
 
 ---
+
+### ⚡구현 세부사항
 
 <br>
 
