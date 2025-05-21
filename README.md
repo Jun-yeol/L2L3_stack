@@ -18,7 +18,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 ### 🏗️아키텍처
 #### 네트워크 구조체
 
-1. `interface_t` (인터페이스 구조체): 노드의 네트워크 인터페이스를 나타냅니다.
+1. `interface_t` (인터페이스 구조체): 노드의 네트워크 인터페이스
 
   - 필드:
 
@@ -32,7 +32,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 <br>
 
 
-2. `link_t` (링크 구조체): 두 인터페이스 간의 연결을 나타냅니다.
+2. `link_t` (링크 구조체): 두 인터페이스 간의 연결
 
   - 필드:
 
@@ -41,7 +41,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
     cost: 링크의 비용 (네트워크 경로 계산 시 사용)
 <br>
 
-3. `node_t` (노드 구조체): 네트워크 내의 하나의 노드를 나타냅니다.
+3. `node_t` (노드 구조체): 네트워크 내의 하나의 노드
 
   - 필드:
   
@@ -68,7 +68,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 <br>
 
 5. 구조체들간에 연결 관계 시각화
-<img src="https://github.com/user-attachments/assets/5fe0cba9-8007-479e-aa1f-56cd7728e45a" width="800px">
+<img src="https://github.com/user-attachments/assets/5fe0cba9-8007-479e-aa1f-56cd7728e45a" width="600px">
 <br>
 
   이 구조체들을 기반으로 한 네트워크 시뮬레이터를 생성.
@@ -76,7 +76,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 ---
 
 ### 🔗통신 모델
-<img src="https://github.com/user-attachments/assets/a6f144d8-cdeb-4afe-8129-e211157e67ac" width="800px">
+<img src="https://github.com/user-attachments/assets/a6f144d8-cdeb-4afe-8129-e211157e67ac" width="600px">
 
 
 #### 데이터 전송 시 select() 모델 과 loopback 주소를 활용
@@ -117,10 +117,60 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 
 <br>
 
-### 트러블 슈팅
+#### 1. 네트워크 토폴로지 생성
+
+![image](https://github.com/user-attachments/assets/f74f3c2c-2e67-45d9-8f39-c9bd0f7d987a)
+
+- 그래프, 노드 생성.
+- 각 노드의 인터페이스 설정, 노드끼리 연결.
+- 네트워크 패킷 수신 thread생성
+<br>
+
+#### 2. 네트워크 수신 thread 시작점
+
+- 노드별 udp소켓 생성
+- 이벤트 발생까지 대기
+- 파일 디스크립터가 활성화 되면 데이터 recevie
+<br>
+
+#### 3. 데이터 링크 계층 진입점
+
+![image](https://github.com/user-attachments/assets/6e5111ef-758e-48f8-94ce-ea0b0c4295f0)
+
+- 수신한 패킷을 overflow를 방지하기 위해 recv 버퍼에 오른쪽 정렬하여 저장
+- layer 2계층으로 진입
+<br>
+
+#### 4. 이더넷 헤더의 Type 필드에 따라 ARP 메시지로 분기
+
+![image](https://github.com/user-attachments/assets/cac807bb-5c6b-449f-8566-d52071a152fd)
+
+##### ARP 메시지 루틴
+- send_arp_broadcast_request():
+  1. 이더넷 패킷헤더의 ff:ff:ff:ff:ff 목적지 주소로 생성
+  2. ARP Broadcast Request 메시지 생성
+  3. 패킷 데이터 전송
+- process_arp_broadcast_request():
+  1. broadcast요청으로 목적지 ip 비교
+  2. 이더넷 패킷의 payload(ARP 헤더)추출
+  3. ARP헤더의 목적지 mac가 broadcast인지 확인
+  4. send_arp_reply() 호출
+- process_arp_reply_mg
+  1. 응답 arp 패킷 받음
+  2. arp table 업데이트
+
+<br>
+
+
+#### 5. 실행 결과
+
+![스크린샷 2025-05-22 013850](https://github.com/user-attachments/assets/56876e18-bb34-4c55-b20c-7a5fd32927f8)
+
+
+![스크린샷 2025-05-22 014010](https://github.com/user-attachments/assets/0e0dfe32-cf98-4c3a-9c73-7acc3921dadc)
+
+
+![스크린샷 2025-05-22 014021](https://github.com/user-attachments/assets/e865f481-2f33-4487-89d3-0a6f874e9ee7)
 
 ---
 
-#### 참고
-
----
