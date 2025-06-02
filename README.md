@@ -3,7 +3,7 @@
 
 ### 🛠️프로젝트 개요
 이 프로젝트는 가상 L2 스위치 통신 시뮬레이터 개발을 목표로합니다.
-네트워크 내 노드간 통신을 시뮬레이션하기 위해 Ethernet 및 ARP 프로토콜을 구현하였으며, UDP 소켓, loopback 주소,
+네트워크 내 노드 간 통신을 시뮬레이션하기 위해 Ethernet 및 ARP 프로토콜을 구현하였고 UDP 소켓, loopback 주소,
 select() 모델을 활용하여 데이터 전송을 구현합니다.
 
 ### 🛠️기술 스택
@@ -24,11 +24,11 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 
     if_name: 인터페이스의 이름
 
-    att_node: 해당 인터페이스가 속한 노드
+    att_node: 소속 노드
 
-    link: 해당 인터페이스가 연결된 링크
+    link: 연결된 링크
 
-    intf_nw_props: 인터페이스의 네트워크 속성 (예: IP 주소, 서브넷 마스크 등)
+    intf_nw_props: 네트워크 속성 구조체 (예: IP 주소, 서브넷 마스크 등)
 <br>
 
 
@@ -81,8 +81,8 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 
 #### 데이터 전송 시 select() 모델 과 loopback 주소를 활용
 
-**Select 모델**을 사용하여 한 노드에서 목적지 노드로 데이터를 전송할 때, loopback 주소를 사용하여 데이터를 전송하면,
-목적지 노드에서 모니터링 중이던 UDP 소켓의 파일 디스크립터에서 이벤트가 발생하고, 이를 통해 데이터를 처리 할 수 있게 됨.
+**select() 모델**을 사용하여 한 노드에서 목적지 노드로 데이터를 전송할 때, loopback 주소를 사용하여 데이터를 전송하면,
+목적지 노드는 자체 UDP 소켓을 통해 해당 이벤트를 감지하고 데이터를 수신/처리할 수 있습니다.
 
 이 과정에서 논리적으로 노드 간의 데이터 통신이 이루어짐.
 
@@ -147,17 +147,29 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 
 ##### ARP 메시지 루틴
 - send_arp_broadcast_request():
-  1. 이더넷 패킷헤더의 ff:ff:ff:ff:ff 목적지 주소로 생성
-  2. ARP Broadcast Request 메시지 생성
-  3. 패킷 데이터 전송
+  <br>
+  ① 이더넷 패킷헤더의 FF:FF:FF:FF:FF 목적지 주소로 생성
+  <br>
+  ② ARP Broadcast Request 메시지 생성
+  <br>
+  ③ 패킷 데이터 전송
+  <br>
 - process_arp_broadcast_request():
-  1. broadcast요청으로 목적지 ip 비교
-  2. 이더넷 패킷의 payload(ARP 헤더)추출
-  3. ARP헤더의 목적지 mac가 broadcast인지 확인
-  4. send_arp_reply() 호출
+  <br>
+  ① broadcast요청으로 목적지 ip 비교
+  <br>
+  ② 이더넷 패킷의 payload(ARP 헤더)추출
+  <br>
+  ③ ARP헤더의 목적지 mac가 broadcast인지 확인
+  <br>
+  ④ send_arp_reply() 호출
+  <br>
 - process_arp_reply_mg
-  1. 응답 arp 패킷 받음
-  2. arp table 업데이트
+  <br>
+  ① 응답 arp 패킷 받음
+  <br>
+  ② arp table 업데이트
+  <br>
 
 <br>
 
@@ -166,6 +178,7 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 
 ![스크린샷 2025-05-22 013850](https://github.com/user-attachments/assets/56876e18-bb34-4c55-b20c-7a5fd32927f8)
 
+- 
 
 ![스크린샷 2025-05-22 014010](https://github.com/user-attachments/assets/0e0dfe32-cf98-4c3a-9c73-7acc3921dadc)
 
@@ -173,3 +186,15 @@ select() 모델을 활용하여 데이터 전송을 구현합니다.
 ![스크린샷 2025-05-22 014021](https://github.com/user-attachments/assets/e865f481-2f33-4487-89d3-0a6f874e9ee7)
 
 ---
+
+#### 📚 참고 자료 및 목적
+
+본 프로젝트는 Udemy 강의  
+[Networking Projects - Implement TCP/IP Stack in C][(https://www.udemy.com/course/tcpipstack/?couponCode=KEEPLEARNING)]  
+을 기반으로 구현된 시뮬레이터입니다.
+
+- UDP 기반의 가상 네트워크 통신 흐름
+- 이더넷 헤더 구조 및 ARP 프로토콜 처리
+- select() 기반 다중 I/O 처리 방식
+
+등을 직접 분석하고 재현해보며 **네트워크 계층 간의 상호작용**에 대한 이해를 높이는 데 목적을 두었습니다.
